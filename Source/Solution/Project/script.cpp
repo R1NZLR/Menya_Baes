@@ -5,15 +5,15 @@
 #pragma warning(disable : 4244 4305) // double <-> float conversions
 
 namespace SUB{enum{
-		// Define submenu (enum) indices here
-/*base*/	CLOSED,
+// Define submenu (enum) indices here.
+			CLOSED,
 			MAINMENU,
 			SETTINGS,
 			SETTINGS_COLOURS,
 			SETTINGS_COLOURS2,
 			SETTINGS_FONTS,
 			SETTINGS_FONTS2,
-/*others*/
+	// Others:
 			SAMPLE,
 			YOURSUB,
 
@@ -388,13 +388,13 @@ float current_timescale = 1.0f;
 bool loop_massacre_mode = 0, loop_RainbowBoxes = 0, loop_gravity_gun = 0, loop_gta2cam = 0;
 }
 namespace{
-	// Declare subroutines here.
+// Declare subroutines here.
 
 
 
 }
 namespace{
-	// Define subroutines here.
+// Define subroutines here.
 
 void VectorToFloat(Vector3 unk, float *Out)
 {
@@ -656,6 +656,7 @@ public:
 	static int currentop_ar[20];
 	static int SetSub_delayed;
 	static unsigned long int livetimer;
+	static bool bit_centre_title, bit_centre_options, bit_centre_breaks;
 
 	static void loops();
 	static void sub_handler();
@@ -795,7 +796,7 @@ public:
 	static bool isBinds()
 	{
 		// Open menu - RB + LB / NUM4 + NUM6
-		return ((IS_CONTROL_PRESSED(2, INPUT_FRONTEND_RB) && IS_CONTROL_PRESSED(2, INPUT_FRONTEND_LB)) || (IsKeyDown(VK_NUMPAD4) && IsKeyDown(VK_NUMPAD6)));
+		return ((IS_DISABLED_CONTROL_PRESSED(2, INPUT_FRONTEND_RB) && IS_DISABLED_CONTROL_PRESSED(2, INPUT_FRONTEND_LB)) || (IsKeyDown(VK_NUMPAD4) && IsKeyDown(VK_NUMPAD6)));
 	}
 	static void while_closed()
 	{
@@ -894,7 +895,7 @@ public:
 		currentsub = SUB::CLOSED;
 	}
 
-}; unsigned __int16 menu::currentsub = 0; unsigned __int16 menu::currentop = 0; unsigned __int16 menu::currentop_w_breaks = 0; unsigned __int16 menu::totalop = 0; unsigned __int16 menu::printingop = 0; unsigned __int16 menu::breakcount = 0; unsigned __int16 menu::totalbreaks = 0; unsigned __int8 menu::breakscroll = 0; __int16 menu::currentsub_ar_index = 0; int menu::currentsub_ar[20] = {}; int menu::currentop_ar[20] = {}; int menu::SetSub_delayed = 0; unsigned long int menu::livetimer;
+}; unsigned __int16 menu::currentsub = 0; unsigned __int16 menu::currentop = 0; unsigned __int16 menu::currentop_w_breaks = 0; unsigned __int16 menu::totalop = 0; unsigned __int16 menu::printingop = 0; unsigned __int16 menu::breakcount = 0; unsigned __int16 menu::totalbreaks = 0; unsigned __int8 menu::breakscroll = 0; __int16 menu::currentsub_ar_index = 0; int menu::currentsub_ar[20] = {}; int menu::currentop_ar[20] = {}; int menu::SetSub_delayed = 0; unsigned long int menu::livetimer; bool menu::bit_centre_title = 1, menu::bit_centre_options = 0, menu::bit_centre_breaks = 1;
 bool CheckAJPressed()
 {
 	if (IS_DISABLED_CONTROL_JUST_PRESSED(2, INPUT_SCRIPT_RDOWN) || IsKeyJustUp(VK_NUMPAD5)) return true; else return false;
@@ -966,15 +967,20 @@ void AddTitle(char* text)
 	SET_TEXT_FONT(font_title);
 
 	SET_TEXT_COLOUR(titletext.R, titletext.G, titletext.B, titletext.A);
-	SET_TEXT_CENTRE(1);
+
+	if (menu::bit_centre_title)
+	{
+		SET_TEXT_CENTRE(1);
+		OptionY = 0.16f + menuPos; // X coord
+	}
+	else OptionY = 0.066f + menuPos; // X coord
 
 	if (Check_compare_string_length(text, 14))
 	{
 		SET_TEXT_SCALE(0.75f, 0.75f);
-		drawstring(text, 0.16f + menuPos, 0.1f);
+		drawstring(text, OptionY, 0.1f);
 	}
-	else drawstring(text, 0.16f + menuPos, 0.13f);
-
+	else drawstring(text, OptionY, 0.13f);
 
 }
 void nullFunc(){ return; }
@@ -1017,10 +1023,10 @@ void AddOption(char* text, bool &option_code_bool = null, void (&Func)() = nullF
 	}
 
 	if (submenu_index != -1) text = AddStrings(text, tempChar);
-	if (menuPos == 0.34f)
+	if (menu::bit_centre_options)
 	{
 		SET_TEXT_CENTRE(1);
-		drawstring(text, 5.0f, OptionY);
+		drawstring(text, 0.16f + menuPos, OptionY);
 	}
 	else drawstring(text, 0.066f + menuPos, OptionY);
 }
@@ -1112,14 +1118,14 @@ void AddBreak(char* text)
 		}
 		
 	}
-	if (menuPos == 0.34f)
-	{
-		drawstring(text, 0.066f + menuPos, OptionY);
-	}
-	else
+	if (menu::bit_centre_breaks)
 	{
 		SET_TEXT_CENTRE(1);
 		drawstring(text, 0.16f + menuPos, OptionY);
+	}
+	else
+	{
+		drawstring(text, 0.066f + menuPos, OptionY);
 	}
 
 }
@@ -1130,7 +1136,7 @@ void AddNumber(char* text, long value, __int8 decimal_places, bool &A_PRESS = nu
 	if (OptionY < 0.6325 && OptionY > 0.1425)
 	{
 		SET_TEXT_FONT(0);
-		SET_TEXT_SCALE(0.3f, 0.3f);
+		SET_TEXT_SCALE(0.275f, 0.275f);
 		SET_TEXT_CENTRE(1);
 
 		drawfloat(value, (DWORD)decimal_places, 0.233f + menuPos, OptionY);
@@ -1348,7 +1354,8 @@ void set_gta2_cam_rot()
 
 
 namespace sub{
-	// Define submenus here.
+// Define submenus here.
+
 void MainMenu()
 {
 	AddTitle("Menya Baes");
@@ -1365,22 +1372,25 @@ void MainMenu()
 
 void Settings()
 {
-	bool menu_pos_plus = 0, menu_pos_minus = 0;
+	bool settings_pos_plus = 0, settings_pos_minus = 0;
 
 	AddTitle("Settings");
 	AddOption("Menu Colours", null, nullFunc, SUB::SETTINGS_COLOURS);
 	AddOption("Menu Fonts", null, nullFunc, SUB::SETTINGS_FONTS);
-	AddNumber("Menu Position", (DWORD)menuPos / 100, 0, null, menu_pos_plus, menu_pos_minus);
+	AddToggle("Centre Title", menu::bit_centre_title);
+	AddToggle("Centre Options", menu::bit_centre_options);
+	AddToggle("Centre Breaks", menu::bit_centre_breaks);
+	AddNumber("Menu Position", (DWORD)menuPos / 100, 0, null, settings_pos_plus, settings_pos_minus);
 
-
-	if (menu_pos_plus){
+	if (settings_pos_plus){
 		if (menuPos < 0.68f) menuPos += 0.01f;
 		return;
 	}
-	else if (menu_pos_minus){
+	else if (settings_pos_minus){
 		if (menuPos > 0.0f) menuPos -= 0.01f;
 		return;
 	}
+
 }
 void AddsettingscolOption(char* text, unsigned __int8 submenu_index, int index)
 {
@@ -1674,7 +1684,7 @@ void YourSub()
 
 void menu::loops()
 { 
-	/*	Make calls to functions that you want looped over here, e.g. ambient lights, gravity gun, explosions, checks, etc.
+	/*	Make calls to functions that you want looped over here, e.g. ambient lights, whale guns, explosions, checks, flying deers, etc.
 		Can also be used for (bool) options that are to be executed from many parts of the script. */
 
 	myVeh = GET_VEHICLE_PED_IS_IN(PLAYER_PED_ID(), 0); // Store current vehicle
@@ -1729,8 +1739,7 @@ void menu::sub_handler()
 
 		while_opened();
 
-		// 1.8s delay for rainbow related loops
-		if (GET_GAME_TIMER() >= livetimer) livetimer = GET_GAME_TIMER() + 1800;
+		if (GET_GAME_TIMER() >= livetimer) livetimer = GET_GAME_TIMER() + 1800; // 1.8s delay for rainbow related loops
 	}
 }
 void main()
