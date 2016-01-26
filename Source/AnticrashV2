@@ -1,0 +1,62 @@
+void FreezeProtection()
+	{
+		int pedx;
+		Ped _ID = PLAYER_PED_ID();
+		int Shirt = GET_PED_DRAWABLE_VARIATION(_ID, 11);
+		int ShirtTex = GET_PED_TEXTURE_VARIATION(_ID, 11);
+		Vector3 c = GET_ENTITY_COORDS(_ID, 1);
+		///////////////////////////////////////////////////////
+		bool fUp = get_key_pressed(VK_SUBTRACT);
+		bool fFowrd = get_key_pressed(VK_NUMPAD7);
+		//	Ped playerPed = PLAYER_PED_ID();
+		//	PrintStringBottomCentre("~g~FLY UP~s~(-) | ~g~FLY FORWARD~s~(7)");
+
+		if (fUp || fFowrd)
+		{
+			if (fUp) {
+				GIVE_DELAYED_WEAPON_TO_PED(PLAYER_PED_ID(), 0xFBAB5776, 1, 0);
+				SET_PED_TO_RAGDOLL_WITH_FALL(_ID, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0);
+				APPLY_FORCE_TO_ENTITY(_ID, true, 0, 0, 9999999, 0, 0, 0, true, true, true, true, false, true);
+			}
+			else
+				if (IS_ENTITY_IN_AIR(_ID))
+					GIVE_DELAYED_WEAPON_TO_PED(PLAYER_PED_ID(), 0xFBAB5776, 1, 0);
+			APPLY_FORCE_TO_ENTITY(_ID, true, 0, 9999999, 0, 0, 0, 0, true, true, true, true, false, true);
+		}
+		////////
+
+
+
+
+		const int numElements = 200;
+		const int arrSize = numElements * 2 + 2;
+		int peds[arrSize];
+		peds[0] = numElements;
+		int count = GET_PED_NEARBY_PEDS(_ID, peds, -1);
+		if (count > 25)
+		{
+			PrintStringBottomCentre("~g~CRASH ATTEMPT DETECTED PRESS 7");
+			if (peds != NULL) {
+				for (int i = 0; i < count; i++)
+				{
+					int offsettedID = i * 2 + 2;
+					if (peds[offsettedID] != null && DOES_ENTITY_EXIST(peds[offsettedID]))
+					{
+
+						RequestControl(peds[offsettedID]);
+						SET_ENTITY_AS_MISSION_ENTITY(peds[offsettedID], 0, 1);
+						DELETE_ENTITY(&peds[offsettedID]);
+						SET_PED_AS_NO_LONGER_NEEDED(&peds[offsettedID]);
+						APPLY_FORCE_TO_ENTITY(_ID, true, 0, 0, 9999999, 0, 0, 0, true, true, true, true, false, true);
+						if (DOES_ENTITY_EXIST(peds[offsettedID]))
+						{
+							DELETE_PED(&peds[offsettedID]);
+						}
+					}
+				}
+				Vector3 coords = GET_ENTITY_COORDS(PLAYER_PED_ID(), 1);
+				CLEAR_AREA_OF_PEDS(coords.x, coords.y, coords.z, 3000, 0);
+
+			}
+		}
+	}
